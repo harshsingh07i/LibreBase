@@ -11,8 +11,11 @@ When Qardio Inc. shut down in 2025 — app delisted, servers dark — the scales
 ![platform](https://img.shields.io/badge/platform-iOS-blue)
 ![swift](https://img.shields.io/badge/Swift-5-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)
+![tested](https://img.shields.io/badge/tested-QardioBase%201%20only-orange)
 
 </div>
+
+> **Compatibility:** tested only with the **original QardioBase (1st generation, model B100)**. QardioBase 2 and QardioBase X are **untested** — they may work, but no promises. Capture logs from those models are very welcome (see [Contributing](#contributing)).
 
 ---
 
@@ -29,7 +32,7 @@ When Qardio Inc. shut down in 2025 — app delisted, servers dark — the scales
 ## Requirements
 
 - iPhone running iOS 26.5 or later.
-- A QardioBase smart scale. Tested against the original **QardioBase (B100)**; QardioBase 2 / X are untested — see [Supported hardware](#supported-hardware).
+- A **QardioBase (1st generation, model B100)** smart scale — the only model tested so far. QardioBase 2 / X are untested; see [Supported hardware](#supported-hardware).
 - To build and run on a device: Xcode 26+ and an Apple Developer account (HealthKit requires a provisioned device, not the simulator, for real data).
 
 ## Build & run
@@ -86,7 +89,7 @@ LibreBase has no servers, no analytics, and no network code. Everything happens 
 
 | Model | Status |
 |-------|--------|
-| QardioBase (B100) | ✅ Tested — weight → Health works |
+| QardioBase (1st gen, B100) | ✅ Tested — weight → Health works |
 | QardioBase 2 | ❓ Untested — likely similar profile |
 | QardioBase X | ❓ Untested — newer/rechargeable, may differ |
 
