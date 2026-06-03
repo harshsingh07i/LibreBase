@@ -15,12 +15,16 @@ struct ContentView: View {
     @AppStorage("heightCm") private var heightCm = 0.0
     @State private var showHeightSheet = false
     @State private var showSettings = false
+    @State private var showReportScale = false
     @State private var pickerCmValue = 170   // wheel selection, metric (cm)
     @State private var pickerFeet = 5         // wheel selection, imperial
     @State private var pickerInches = 7
 
     /// Show height in feet/inches in imperial regions, centimeters otherwise.
-    private var useMetric: Bool { Locale.current.measurementSystem == .metric }
+    /// Screenshot mode can pin this so the kg/lb scenes render deterministically.
+    private var useMetric: Bool {
+        ScreenshotMode.forcedUseMetric ?? (Locale.current.measurementSystem == .metric)
+    }
 
     // Weight is always stored in kilograms; display it in the user's preferred
     // unit (pounds in imperial regions). Saving to Health is unaffected.
@@ -118,6 +122,13 @@ struct ContentView: View {
             if phase == .active { scale.resumeScanning() }
         }
         .task {
+            // Screenshot mode: show a demo weigh-in and skip the real Bluetooth /
+            // Health machinery (no prompts, no scanning) so captures are clean.
+            if ScreenshotMode.isActive {
+                if ScreenshotMode.showsReading { scale.loadDemoReading() }
+                return
+            }
+
             // Safety net: onboarding normally creates the Bluetooth central in its
             // permission step, but users upgrading past onboarding never saw it —
             // start it here too. Idempotent.
@@ -379,38 +390,36 @@ struct ContentView: View {
         NavigationStack {
             List {
                 Section {
-                    // Recon mode toggle (Phase 1 GATT capture) — kept out of the
-                    // everyday screen but always available to re-capture a new
-                    // device/cycle.
-                    Toggle("Recon mode (BLE capture)", isOn: $scale.reconMode)
-
-                    if scale.reconMode {
-                        ScrollView {
-                            Text(scale.reconLog.isEmpty
-                                 ? "Discovering services… step on the scale to capture payloads."
-                                 : scale.reconLog.joined(separator: "\n"))
-                                .font(.system(.caption2, design: .monospaced))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .textSelection(.enabled)
-                        }
-                        .frame(maxHeight: 220)
+                    Link(destination: Constants.supportMailURL) {
+                        Label("Support", systemImage: "envelope")
+                    }
+                    Button {
+                        showReportScale = true
+                    } label: {
+                        Label("Report your scale", systemImage: "exclamationmark.bubble")
+                    }
+                    Link(destination: Constants.privacyURL) {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                    }
+                    Link(destination: Constants.githubURL) {
+                        Label("Source on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                    }
+                    Link(destination: Constants.licenseURL) {
+                        Label("Source code (MIT)", systemImage: "doc.text")
+                    }
+                    Link(destination: Constants.otherAppsURL) {
+                        Label("My Other Apps", systemImage: "square.grid.2x2")
                     }
                 } header: {
-                    Text("Developer")
+                    Text("Support & Legal")
                 } footer: {
-                    Text("Recon mode logs the scale's raw Bluetooth services and payloads — useful for adding support for new QardioBase hardware.")
-                }
-
-                Section {
-                    Link(destination: URL(string: "https://github.com/stormychel/LibreBase")!) {
-                        Label("stormychel/LibreBase", systemImage: "link")
+                    VStack(spacing: 10) {
+                        Text("LibreBase is tested only with the original QardioBase (1st gen). Have a QardioBase 2 or X? Tap “Report your scale” — we'd love to help support it.")
+                        Text(Constants.versionLabel + " · open source, MIT licensed.")
                     }
-                } header: {
-                    Text("About")
-                } footer: {
-                    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                        Text("LibreBase \(version) · open source, MIT licensed.")
-                    }
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
                 }
             }
             .navigationTitle("Settings")
@@ -419,6 +428,9 @@ struct ContentView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { showSettings = false }
                 }
+            }
+            .sheet(isPresented: $showReportScale) {
+                ReportScaleView().environmentObject(scale)
             }
         }
         .presentationDetents([.large])

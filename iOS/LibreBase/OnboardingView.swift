@@ -18,7 +18,11 @@ struct OnboardingView: View {
     @EnvironmentObject var health: Health
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @Environment(\.scenePhase) private var scenePhase
-    @State private var step = 0
+    @State private var step: Int
+
+    init(initialStep: Int = 0) {
+        _step = State(initialValue: initialStep)
+    }
 
     // Permission state — mirrored from the system so each row can show its status.
     @State private var bluetoothGranted = false
@@ -220,6 +224,15 @@ struct OnboardingView: View {
     }
 
     private func refreshPermissions() {
+        // App Store capture must look identical on every simulator regardless of
+        // its real authorization history, so show a fixed "both granted" state
+        // rather than querying live permissions.
+        if ScreenshotMode.isActive {
+            bluetoothGranted = true; bluetoothDenied = false; bluetoothPrompted = true
+            healthGranted = true; healthDenied = false; healthPrompted = true
+            return
+        }
+
         let bt = CBCentralManager.authorization
         bluetoothGranted = bt == .allowedAlways
         bluetoothDenied = bt == .denied || bt == .restricted
