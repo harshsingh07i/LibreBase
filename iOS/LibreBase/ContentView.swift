@@ -144,6 +144,7 @@ struct ContentView: View {
                     do {
                         try await health.saveWeight(kg: reading.weightKg, date: reading.timestamp)
                         scale.status = "Saved to Apple Health"
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
                     } catch {
                         scale.status = "Couldn't save to Health — check Settings ▸ Privacy ▸ Health"
                     }
