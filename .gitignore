@@ -64,3 +64,19 @@ fastlane/test_output
 # Generated App Store screenshots (regenerate with Scripts/generate-screenshots.sh)
 screenshots/raw/
 screenshots/framed/
+
+# Secrets & signing material — never commit
+*.p8
+*.p12
+*.pem
+*.pfx
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+*.keystore
+*.jks
+AuthKey_*
+*.env
+.env
+.env.*
